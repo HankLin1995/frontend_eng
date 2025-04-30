@@ -17,7 +17,7 @@ st.subheader("🔍 抽查管理")
 
 # 篩選條件
 projects_df = get_projects_df()
-project_filter = st.selectbox(
+project_filter = st.sidebar.selectbox(
     "依專案篩選", 
     ["全部專案"] + projects_df["專案名稱"].tolist() if not projects_df.empty else ["全部專案"]
 )
@@ -273,7 +273,7 @@ def delete_inspection_ui():
 display_inspections(project_filter if project_filter != "全部專案" else None)
 
 # 按鈕列
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3= st.columns(3)
 
 with col1:
     if st.button("📝新增抽查", use_container_width=True):
@@ -283,11 +283,11 @@ with col2:
     if st.button("✏️編輯抽查", use_container_width=True):
         update_inspection_ui()
 
-with col3:
-    if st.button("📄產生報告", use_container_width=True):
-        generate_report_ui()
+# with col3:
+#     if st.button("📄產生報告", use_container_width=True):
+#         generate_report_ui()
 
-with col4:
+with col3:
     if st.button("🗑️刪除抽查", use_container_width=True):
         delete_inspection_ui()
 

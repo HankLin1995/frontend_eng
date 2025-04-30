@@ -211,11 +211,11 @@ def get_photo(photo_id):
         st.error(f"API 連線錯誤: {str(e)}")
         return None
 
-def upload_photo(inspection_id, file, description=""):
+def upload_photo(inspection_id, file, capture_date, caption):
     """上傳照片"""
     try:
         files = {"file": (file.name, file, "image/jpeg")}
-        data = {"inspection_id": inspection_id, "description": description}
+        data = {"inspection_id": inspection_id, "capture_date": capture_date, "caption": caption}
         response = requests.post(f"{API_BASE_URL}/api/photos/", files=files, data=data)
         if response.status_code == 201:
             return response.json()

@@ -76,9 +76,9 @@ def get_photos_df(inspection_id=None):
         df = df.rename(columns={
             "id": "照片編號",
             "inspection_id": "抽查編號",
-            "file_path": "檔案路徑",
-            "description": "描述",
-            "created_at": "上傳時間"
+            "photo_path": "檔案路徑",
+            "caption": "描述",
+            "capture_date": "上傳時間"
         })
         
         # 轉換日期格式

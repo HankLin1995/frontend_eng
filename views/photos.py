@@ -53,7 +53,7 @@ def display_photos(inspection_id=None):
         for i, (_, row) in enumerate(df.iterrows()):
             with cols[i % 3]:
                 # 實際應用中，這裡應該顯示照片的縮圖
-                st.image("https://via.placeholder.com/300x200.png?text=照片預覽", caption=f"{row['描述']}")
+                st.image(f"http://localhost:8000/{row['檔案路徑']}", caption=f"{row['描述']}")
                 st.caption(f"檢查位置: {row['檢查位置']}")
                 st.caption(f"上傳時間: {row['上傳時間']}")
 
@@ -65,11 +65,16 @@ def upload_photo_ui():
         return
     
     with st.form("upload_photo_form"):
+        
         inspection_options = [f"{row['抽查編號']} - {row['檢查位置']}" for _, row in inspections_df.iterrows()]
         selected_inspection = st.selectbox("選擇抽查", inspection_options)
-        
-        description = st.text_input("照片描述", placeholder="請輸入照片描述")
+        capture_date = st.date_input("拍照日期")
+        caption = st.text_input("照片描述", placeholder="請輸入照片描述")
         photo_file = st.file_uploader("選擇照片", type=["jpg", "jpeg", "png"])
+        
+
+        # if photo_file:
+        #     st.image(photo_file)
         
         submitted = st.form_submit_button("上傳")
         if submitted:
@@ -80,7 +85,7 @@ def upload_photo_ui():
             # 取得抽查 ID
             inspection_id = int(selected_inspection.split(" - ")[0])
             
-            response = upload_photo(inspection_id, photo_file, description)
+            response = upload_photo(inspection_id, photo_file,capture_date.strftime("%Y-%m-%d"), caption)
             if "error" not in response:
                 st.toast("照片上傳成功", icon="✅")
                 st.cache_data.clear()
@@ -128,14 +133,14 @@ def update_photo_ui():
     # 編輯表單
     with st.form("edit_photo_form"):
         # 顯示照片預覽
-        st.image("https://via.placeholder.com/300x200.png?text=照片預覽")
+        st.image(f"http://localhost:8000/{photo['photo_path']}")
         
-        description = st.text_input("照片描述", value=photo.get("description", ""))
+        caption = st.text_input("照片描述", value=photo.get("caption", ""))
         
         submitted = st.form_submit_button("更新")
         if submitted:
             data = {
-                "description": description
+                "caption": caption,
             }
             
             response = update_photo(photo_id, data)
