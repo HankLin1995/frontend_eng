@@ -10,43 +10,10 @@ from api import (
 )
 from convert import get_inspections_df, get_photos_df
 
-
-# 篩選條件
 inspections_df = get_inspections_df()
 
-# 建立抽查表名稱的唯一列表
-inspection_names = ["全部抽查表"]
-inspection_name_to_counts = {}
-
-if not inspections_df.empty:
-    # 獲取唯一的抽查表名稱
-    unique_names = inspections_df["抽查表名稱"].unique()
-    inspection_names.extend(unique_names)
-    
-    # 為每個抽查表名稱建立對應的抽查次數字典
-    for name in unique_names:
-        counts = inspections_df[inspections_df["抽查表名稱"] == name]["抽查次數"].unique()
-        inspection_name_to_counts[name] = ["全部次數"] + [f"第{count}次" for count in sorted(counts)]
-
-# 第一個下拉選單：選擇抽查表名稱
-selected_inspection_name = st.sidebar.selectbox(
-    "依抽查表名稱篩選", 
-    inspection_names
-)
-
-# 第二個下拉選單：選擇抽查次數（根據選擇的抽查表名稱動態變化）
-count_options = ["全部次數"]
-if selected_inspection_name != "全部抽查表" and selected_inspection_name in inspection_name_to_counts:
-    count_options = inspection_name_to_counts[selected_inspection_name]
-
-selected_count = st.sidebar.selectbox(
-    "依抽查次數篩選",
-    count_options
-)
-
-# 取得照片列表
-@st.cache_data()
-def display_photos(inspection_name=None, inspection_count=None):
+# @st.cache_data()
+def get_filter_df(inspection_name=None, inspection_count=None):
     # 取得照片資料
     df = get_photos_df()
     
@@ -75,30 +42,52 @@ def display_photos(inspection_name=None, inspection_count=None):
     if df.empty:
         st.info("沒有符合篩選條件的照片")
         return
-    
-    # # 顯示照片資料表
-    # st.dataframe(
-    #     df[["照片編號", "抽查表名稱", "抽查次數", "檢查位置", "描述", "上傳時間"]],
-    #     use_container_width=True,
-    #     hide_index=True
-    # )
-    
-    # 顯示照片預覽
-    if not df.empty:
-        st.subheader("📸 照片預覽")
-        cols = st.columns(3, border=True)
-        for i, (_, row) in enumerate(df.iterrows()):
-            with cols[i % 3]:
-                # 實際應用中，這裡應該顯示照片的縮圖
-                st.image(f"http://localhost:8000/{row['檔案路徑']}")
-                st.badge(f"照片ID: {row['照片編號']}")
-                # 顯示檢查位置
-                st.caption(f"檢查位置: {row['檢查位置']}")
-                # 將描述移至底部，並加上前綴
-                if pd.notna(row['描述']) and row['描述']:
-                    st.caption(f"照片說明: {row['描述']}")
-                st.caption(f"上傳時間: {row['上傳時間']}")
-                st.caption(f"抽查名稱: {row['抽查表名稱']}")
+
+    return df
+
+def get_filter_options():
+    # 篩選條件
+    inspections_df = get_inspections_df()
+
+    # 建立抽查表名稱的唯一列表
+    inspection_names = ["全部抽查表"]
+    inspection_name_to_counts = {}
+
+    if not inspections_df.empty:
+        # 獲取唯一的抽查表名稱
+        unique_names = inspections_df["抽查表名稱"].unique()
+        inspection_names.extend(unique_names)
+        
+        # 為每個抽查表名稱建立對應的抽查次數字典
+        for name in unique_names:
+            counts = inspections_df[inspections_df["抽查表名稱"] == name]["抽查次數"].unique()
+            inspection_name_to_counts[name] = ["全部次數"] + [f"第{count}次" for count in sorted(counts)]
+
+    # 第一個下拉選單：選擇抽查表名稱
+    selected_inspection_name = st.sidebar.selectbox(
+        "依抽查表名稱篩選", 
+        inspection_names
+    )
+
+    # 第二個下拉選單：選擇抽查次數（根據選擇的抽查表名稱動態變化）
+    count_options = ["全部次數"]
+    if selected_inspection_name != "全部抽查表" and selected_inspection_name in inspection_name_to_counts:
+        count_options = inspection_name_to_counts[selected_inspection_name]
+
+    selected_count = st.sidebar.selectbox(
+        "依抽查次數篩選",
+        count_options
+    )
+
+    return selected_inspection_name, selected_count
+
+def single_card(row):
+    st.image(f"http://localhost:8000/{row['檔案路徑']}")
+    st.badge(f"照片ID: {row['照片編號']}")
+    st.caption(f"檢查位置: {row['檢查位置']}")
+    st.caption(f"照片說明: {row['描述']}")
+    st.caption(f"上傳時間: {row['上傳時間']}")
+    st.caption(f"抽查名稱: {row['抽查表名稱']}")
 
 # 上傳照片對話框
 @st.dialog("📤上傳照片")
@@ -238,11 +227,18 @@ def delete_photo_ui():
         else:
             st.error(f"刪除失敗: {response['error']}")
 
-# 顯示照片列表
-display_photos(
-    inspection_name=selected_inspection_name,
-    inspection_count=selected_count
-)
+##### MAIN UI #####
+
+selected_inspection_name, selected_count = get_filter_options()
+
+df=get_filter_df(selected_inspection_name, selected_count)
+
+if not df.empty:
+    st.subheader("📸 照片預覽")
+    cols = st.columns(3, border=True)
+    for i, (_, row) in enumerate(df.iterrows()):
+        with cols[i % 3]:
+            single_card(row)
 
 st.markdown("---")
 
