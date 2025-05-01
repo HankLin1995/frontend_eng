@@ -13,7 +13,7 @@ from api import (
 )
 from convert import get_projects_df, get_inspections_df
 
-st.subheader("🔍 抽查管理")
+st.subheader("🔍 抽查表清單")
 
 # 篩選條件
 projects_df = get_projects_df()
@@ -275,11 +275,12 @@ display_inspections(project_filter if project_filter != "全部專案" else None
 # 按鈕列
 col1, col2, col3= st.columns(3)
 
-with col1:
-    if st.button("📝新增抽查", use_container_width=True):
-        add_inspection_ui()
+# with col3:
+#     if st.button("📝新增抽查", use_container_width=True):
+#         st.toast("請點選側邊攔新增抽查表", icon="ℹ️")
+        # add_inspection_ui()
 
-with col2:
+with col1:
     if st.button("✏️編輯抽查", use_container_width=True):
         update_inspection_ui()
 
@@ -287,8 +288,12 @@ with col2:
 #     if st.button("📄產生報告", use_container_width=True):
 #         generate_report_ui()
 
-with col3:
+with col2:
     if st.button("🗑️刪除抽查", use_container_width=True):
         delete_inspection_ui()
+
+with col3:
+    if st.button("📝列印報告", use_container_width=True):
+        generate_report_ui()
 
 # 新增抽查對話框

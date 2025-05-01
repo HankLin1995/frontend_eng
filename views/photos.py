@@ -14,7 +14,7 @@ st.subheader("📸 照片管理")
 
 # 篩選條件
 inspections_df = get_inspections_df()
-inspection_filter = st.selectbox(
+inspection_filter = st.sidebar.selectbox(
     "依抽查篩選", 
     ["全部抽查"] + [f"{row['抽查編號']} - {row['檢查位置']}" for _, row in inspections_df.iterrows()] if not inspections_df.empty else ["全部抽查"]
 )
