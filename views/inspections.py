@@ -49,7 +49,7 @@ def display_inspections(project_name=None):
     
     # 顯示抽查資料表
     st.dataframe(
-        df[["抽查編號", "專案名稱", "分項工程名稱", "抽查表名稱", "檢查位置", "抽查時機", "抽查日期", "抽查結果"]].style.format({
+        df[["抽查編號", "專案名稱", "分項工程名稱", "抽查表名稱", "抽查次數", "檢查位置", "抽查時機", "抽查日期", "抽查結果"]].style.format({
             "抽查日期": lambda x: x
         }),
         use_container_width=True,

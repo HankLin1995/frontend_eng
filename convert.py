@@ -53,6 +53,10 @@ def get_inspections_df(project_id=None):
             "updated_at": "更新時間"
         })
         
+        # 計算每個抽查表名稱的抽查次數
+        inspection_counts = df.groupby('抽查表名稱').cumcount() + 1
+        df['抽查次數'] = inspection_counts
+        
         # 轉換日期格式
         if "抽查日期" in df.columns:
             df["抽查日期"] = pd.to_datetime(df["抽查日期"]).dt.strftime("%Y-%m-%d")
