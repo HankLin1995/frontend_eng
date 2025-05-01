@@ -234,7 +234,7 @@ selected_inspection_name, selected_count = get_filter_options()
 df=get_filter_df(selected_inspection_name, selected_count)
 
 if not df.empty:
-    st.subheader("📸 照片預覽")
+    st.subheader("📸 照片圖廊")
     cols = st.columns(3, border=True)
     for i, (_, row) in enumerate(df.iterrows()):
         with cols[i % 3]:

@@ -159,7 +159,7 @@ def delete_inspection(inspection_id):
 def upload_inspection_pdf(inspection_id, file):
     """上傳巡檢 PDF"""
     try:
-        files = {"file": (file.name, file, "application/pdf")}
+        files = {"file": (file.name,file.getvalue(), "application/pdf")}
         response = requests.post(f"{API_BASE_URL}/api/inspections/{inspection_id}/upload-pdf", files=files)
         if response.status_code == 200:
             return response.json()

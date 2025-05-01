@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime
 import time
 from api import (
+    get_project,
     get_inspections,
     get_inspection,
     create_inspection,
@@ -13,25 +14,11 @@ from api import (
 )
 from convert import get_projects_df, get_inspections_df
 
-st.subheader("🔍 抽查表清單")
-
-# 篩選條件
-projects_df = get_projects_df()
-project_filter = st.sidebar.selectbox(
-    "依專案篩選", 
-    ["全部專案"] + projects_df["專案名稱"].tolist() if not projects_df.empty else ["全部專案"]
-)
-
-# 取得抽查列表
 @st.cache_data()
-def display_inspections(project_name=None):
-    # 如果選擇特定專案，取得專案 ID
-    project_id = None
-    if project_name and project_name != "全部專案":
-        project_id = int(projects_df[projects_df["專案名稱"] == project_name]["專案編號"].values[0])
-    
-    # 取得抽查資料
-    df = get_inspections_df(project_id)
+def get_merged_df(project_filter):
+
+        # 取得抽查資料
+    df = get_inspections_df(project_filter['id'])
     
     if df.empty:
         st.info("目前沒有抽查資料")
@@ -46,16 +33,8 @@ def display_inspections(project_name=None):
             right_on="專案編號", 
             how="left"
         )
-    
-    # 顯示抽查資料表
-    st.dataframe(
-        df[["抽查編號", "專案名稱", "分項工程名稱", "抽查表名稱", "抽查次數", "檢查位置", "抽查時機", "抽查日期", "抽查結果"]].style.format({
-            "抽查日期": lambda x: x
-        }),
-        use_container_width=True,
-        hide_index=True
-    )
 
+    return df
 
 @st.dialog("📝新增抽查")
 def add_inspection_ui():
@@ -101,7 +80,6 @@ def add_inspection_ui():
                 else:
                     st.error(f"新增抽查失敗: {resp['error']}")
 
-
 # 編輯抽查對話框
 @st.dialog("✏️編輯抽查")
 def update_inspection_ui():
@@ -144,6 +122,8 @@ def update_inspection_ui():
         result = st.selectbox("抽查結果", ["合格", "不合格"], index=["合格", "不合格"].index(inspection.get("result", "合格") or "合格"))
         remark = st.text_area("備註", value=inspection.get("remark", ""))
         
+
+
         # 顯示其他不可編輯的欄位
         st.info(f"所屬專案: {projects_df[projects_df['專案編號'] == inspection['project_id']]['專案名稱'].values[0] if not projects_df.empty else ''}")
         st.info(f"分項工程名稱: {inspection.get('subproject_name', '')}")
@@ -179,7 +159,6 @@ def update_inspection_ui():
                 st.rerun()
             else:
                 st.error(f"更新失敗: {response['error']}")
-
 
 # 產生報告對話框
 @st.dialog("📄產生報告")
@@ -269,31 +248,49 @@ def delete_inspection_ui():
             st.error(f"刪除失敗: {response['error']}")
 
 
-# 顯示抽查列表
-display_inspections(project_filter if project_filter != "全部專案" else None)
+##### MAIN_UI #####
 
-# 按鈕列
-col1, col2, col3= st.columns(3)
+st.subheader("🔍 抽查表清單")
 
-# with col3:
-#     if st.button("📝新增抽查", use_container_width=True):
-#         st.toast("請點選側邊攔新增抽查表", icon="ℹ️")
-        # add_inspection_ui()
+# 取得目標專案
 
-with col1:
-    if st.button("✏️編輯抽查", use_container_width=True):
-        update_inspection_ui()
+projects_df = get_projects_df()
+project_filter = st.sidebar.selectbox(
+    "依專案篩選", 
+    ["全部專案"] + projects_df["專案名稱"].tolist() if not projects_df.empty else ["全部專案"]
+)
 
-# with col3:
-#     if st.button("📄產生報告", use_container_width=True):
-#         generate_report_ui()
+if project_filter == "全部專案":
+    project_id=None
+else:
+    project_id=projects_df[projects_df["專案名稱"] == project_filter]["專案編號"].values[0]
 
-with col2:
-    if st.button("🗑️刪除抽查", use_container_width=True):
-        delete_inspection_ui()
+df = get_inspections_df()
 
-with col3:
-    if st.button("📝列印報告", use_container_width=True):
-        generate_report_ui()
+# 顯示篩選後的抽查清單
 
-# 新增抽查對話框
+if project_filter != "全部專案":
+    df=df[df["專案編號"] == project_id]
+
+
+df_show=df[["抽查編號", "抽查表名稱", "抽查日期","檢查位置", "抽查結果"]].style.format({
+        "抽查日期": lambda x: x
+    })
+
+# 顯示抽查資料表
+event = st.dataframe(
+    df_show,
+    use_container_width=True,
+    hide_index=True,
+    on_select="rerun",
+    selection_mode="multi-row",
+)
+
+# selection = event.selection.rows
+# filtered_df = df.iloc[selection]
+
+st.markdown("---")
+
+if st.button("📝列印報告"):
+    # generate_report_ui()
+    pass
