@@ -1,7 +1,8 @@
 import streamlit as st
 import pypdfium2 as pdfium
+import datetime
 
-from api import get_projects
+from api import get_projects, create_inspection, upload_inspection_pdf, upload_photo
 
 if "photos" not in st.session_state:
     st.session_state.photos = []  # 用來儲存多張照片的列表
@@ -73,9 +74,75 @@ def upload_photos_ui():
             st.success("照片上傳成功！")
             st.rerun()
 
-# 初始化 session_state
-if 'photos' not in st.session_state:
-    st.session_state.photos = []  # 用來儲存多張照片的列表
+# 儲存資料函數
+def save_inspection_data():
+    """儲存抽查資料、PDF和照片"""
+    # 獲取選中的專案ID
+    selected_project_name = check_project
+    project_id = None
+    
+    # 從專案列表中找到對應的專案ID
+    projects = get_projects()
+    for project in projects:
+        if project["name"] == selected_project_name:
+            project_id = project["id"]
+            break
+    
+    if not project_id:
+        st.error("❌ 無法找到所選專案，請重新選擇")
+        return
+    
+    # 準備抽查資料
+    inspection_data = {
+        "project_id": project_id,
+        "subproject_name": check_item,  # 使用抽查項目作為子專案名稱
+        "inspection_form_name": check_item,  # 使用抽查項目作為表單名稱
+        "inspection_date": check_date.isoformat(),  # 轉換為ISO格式的日期字符串
+        "location": check_location,
+        "timing": check_type,  # 抽查時機
+        "result": check_result,  # 抽查結果
+        "remark": check_note  # 備註
+    }
+    
+    # 建立抽查記錄
+    result = create_inspection(inspection_data)
+    
+    if "error" in result:
+        st.error(f"❌ 儲存抽查資料失敗: {result['error']}")
+        return
+    
+    inspection_id = result["id"]
+    st.success(f"✅ 抽查資料儲存成功！ID: {inspection_id}")
+    
+    # 上傳PDF檔案（如果有）
+    if st.session_state.pdf_file:
+        pdf_result = upload_inspection_pdf(inspection_id, st.session_state.pdf_file)
+        if "error" in pdf_result:
+            st.error(f"❌ PDF上傳失敗: {pdf_result['error']}")
+        else:
+            st.success("✅ PDF上傳成功！")
+    
+    # 上傳照片（如果有）
+    for photo in st.session_state.photos:
+        # 取得目前日期作為照片日期
+        today = datetime.date.today().isoformat()
+        
+        photo_result = upload_photo(
+            inspection_id=inspection_id,
+            file=photo["file"],
+            capture_date=today,
+            caption=photo["caption"]
+        )
+        
+        if "error" in photo_result:
+            st.error(f"❌ 照片上傳失敗: {photo_result['error']}")
+        else:
+            st.success(f"✅ 照片「{photo['caption']}」上傳成功！")
+    
+    # 清空表單和session state
+    st.session_state.photos = []
+    st.session_state.pdf_file = None
+    st.rerun()
 
 # 主應用介面
 
@@ -157,4 +224,5 @@ if st.sidebar.button("📸 3.上傳照片", key="upload_photos"):
 
 st.markdown("---")
 
-st.button("4.儲存資料",type="primary")
+if st.button("4.儲存資料", type="primary"):
+    save_inspection_data()
