@@ -286,8 +286,17 @@ event = st.dataframe(
     selection_mode="multi-row",
 )
 
-# selection = event.selection.rows
-# filtered_df = df.iloc[selection]
+selection = event.selection.rows
+
+if selection:
+
+    filtered_df = df.iloc[selection]
+
+    inspection_id=int(filtered_df['抽查編號'].values[0])
+
+    inspection_data=get_inspection(inspection_id)
+
+    st.write(inspection_data)
 
 st.markdown("---")
 
