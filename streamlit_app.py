@@ -11,11 +11,13 @@ project_page = st.Page("views/projects.py", title="專案管理", icon=":materia
 inspection_page = st.Page("views/inspections.py", title="抽查表清單", icon=":material/search:")
 photo_page = st.Page("views/photos.py", title="照片圖廊", icon=":material/image:")
 inspection_add_page = st.Page("views/inspections_add.py", title="新增抽查表", icon=":material/search:")
+inspection_edit_page= st.Page("views/inspections_edit.py", title="編輯抽查表", icon=":material/search:")
 
 pg=st.navigation(
     {
-        "基本設定": [project_page],
-        "施工抽查": [inspection_add_page,inspection_page, photo_page]
+        "設定": [project_page],
+        "異動": [inspection_add_page,inspection_edit_page],
+        "總覽": [inspection_page,photo_page]
     }
 )
 
