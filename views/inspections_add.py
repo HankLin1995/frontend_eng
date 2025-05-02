@@ -146,13 +146,13 @@ def save_inspection_data():
 
 # 主應用介面
 
-st.subheader("⭐ 新增抽查表")
+st.subheader("✏️  新增抽查表")
 
 col3, col4 = st.columns([1,1])
 
 with col3.container(border=True):
 
-    st.markdown("2.填寫抽查資料")
+    st.badge("2.填寫抽查資料",color="violet")
 
     prjs=get_projects()
     get_project_list = [item["name"] for item in prjs]
