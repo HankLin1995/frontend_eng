@@ -302,4 +302,23 @@ st.markdown("---")
 
 if st.button("📝列印報告"):
     # generate_report_ui()
-    pass
+    # pass
+    
+    from utils import generate_pdf
+    import json
+
+    with open("data.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    # 生成 PDF 內容並獲取 bytes
+    pdf_bytes = generate_pdf(data)
+
+    # 在 Streamlit 中顯示下載按鈕
+    st.download_button(
+        label="下載 PDF 報告",
+        data=pdf_bytes,
+        file_name="inspection_report.pdf",
+        mime="application/pdf"
+    )    
+
+    
