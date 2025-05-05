@@ -9,8 +9,7 @@ from api import (
     create_inspection,
     update_inspection,
     delete_inspection,
-    upload_inspection_pdf,
-    generate_inspection_report
+    upload_inspection_pdf
 )
 from convert import get_projects_df, get_inspections_df
 
@@ -160,50 +159,6 @@ def update_inspection_ui():
             else:
                 st.error(f"更新失敗: {response['error']}")
 
-# 產生報告對話框
-@st.dialog("📄產生報告")
-def generate_report_ui():
-    # 取得抽查列表
-    inspections_df = get_inspections_df()
-    if inspections_df.empty:
-        st.warning("目前沒有抽查可產生報告")
-        return
-    
-    # 合併專案名稱
-    if not projects_df.empty:
-        inspections_df = pd.merge(
-            inspections_df, 
-            projects_df[["專案編號", "專案名稱"]], 
-            left_on="專案編號", 
-            right_on="專案編號", 
-            how="left"
-        )
-    
-    # 選擇抽查
-    inspection_options = [f"{row['抽查編號']} - {row['專案名稱']} - {row['檢查位置']}" for _, row in inspections_df.iterrows()]
-    selected_inspection = st.selectbox("選擇抽查", inspection_options)
-    
-    if not selected_inspection:
-        st.warning("請選擇要產生報告的抽查")
-        return
-    
-    # 取得抽查 ID
-    inspection_id = int(selected_inspection.split(" - ")[0])
-    
-    if st.button("產生報告"):
-        with st.spinner("正在產生報告..."):
-            response = generate_inspection_report(inspection_id)
-            if "error" not in response:
-                st.success("報告產生成功！")
-                st.download_button(
-                    label="下載報告",
-                    data="報告內容將由後端提供".encode("utf-8"),  # 修正 bytes literal 中文問題
-                    file_name=f"抽查報告_{inspection_id}.pdf",
-                    mime="application/pdf"
-                )
-            else:
-                st.error(f"報告產生失敗: {response['error']}")
-
 # 刪除抽查對話框
 @st.dialog("🗑️刪除抽查")
 def delete_inspection_ui():
@@ -288,37 +243,43 @@ event = st.dataframe(
 
 selection = event.selection.rows
 
+inspection_data={}
+
 if selection:
 
     filtered_df = df.iloc[selection]
-
     inspection_id=int(filtered_df['抽查編號'].values[0])
-
     inspection_data=get_inspection(inspection_id)
 
-    st.write(inspection_data)
+    # st.write(inspection_data)
 
 st.markdown("---")
 
-if st.button("📝列印報告"):
-    # generate_report_ui()
-    # pass
+if inspection_data and st.button("📝列印報告"):
     
-    from utils import generate_pdf
-    import json
+    from utils import generate_pdf, merge_pdfs
 
-    with open("data.json", "r", encoding="utf-8") as f:
-        data = json.load(f)
-
-    # 生成 PDF 內容並獲取 bytes
-    pdf_bytes = generate_pdf(data)
+    # 生成照片報告 PDF 的 bytes
+    photo_pdf_bytes = generate_pdf(inspection_data)
+    
+    # 原始 PDF 的 URL 路徑（使用 data 中的路徑或提供預設路徑）
+    original_pdf_url = f"http://localhost:8000/{inspection_data.get('pdf_path', '')}"
+    
+    # 合併 PDF
+    merged_pdf_bytes = merge_pdfs(original_pdf_url, photo_pdf_bytes)
 
     # 在 Streamlit 中顯示下載按鈕
     st.download_button(
-        label="下載 PDF 報告",
-        data=pdf_bytes,
-        file_name="inspection_report.pdf",
+        label="下載合併 PDF 報告",
+        data=merged_pdf_bytes,
+        file_name=f"inspection_report_{inspection_data.get('id')}_merged.pdf",
         mime="application/pdf"
-    )    
+    )
 
-    
+    # # 此外，提供單獨下載照片報告 PDF 的選項
+    # st.download_button(
+    #     label="僅下載照片報告",
+    #     data=photo_pdf_bytes,
+    #     file_name=f"inspection_report_{inspection_data.get('id')}_photos.pdf",
+    #     mime="application/pdf"
+    # )

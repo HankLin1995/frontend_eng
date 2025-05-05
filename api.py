@@ -168,17 +168,6 @@ def upload_inspection_pdf(inspection_id, file):
     except Exception as e:
         return {"error": str(e)}
 
-def generate_inspection_report(inspection_id):
-    """產生巡檢報告"""
-    try:
-        response = requests.post(f"{API_BASE_URL}/api/inspections/{inspection_id}/generate-pdf")
-        if response.status_code == 200:
-            return response.json()
-        else:
-            return {"error": response.text}
-    except Exception as e:
-        return {"error": str(e)}
-
 # 照片相關 API
 def get_photos(inspection_id=None):
     """取得所有照片，可選依巡檢篩選"""

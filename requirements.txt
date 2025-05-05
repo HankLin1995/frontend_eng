@@ -5,3 +5,4 @@ python-dotenv
 pypdfium2
 reportlab
 Pillow
+PyPDF2
