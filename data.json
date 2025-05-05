@@ -1,27 +1,37 @@
 {
-    "project_name": "中山北路排水改善工程",
-    "agency": "台北市政府工務局",
-    "report_date": "2025-05-04",
+    "project_id": 1,
+    "subproject_name": "混凝土",
+    "inspection_form_name": "混凝土",
+    "inspection_date": "2025-05-02",
+    "location": "28+630",
+    "timing": "隨機抽查",
+    "result": "合格",
+    "remark": "",
+    "id": 1,
+    "pdf_path": "app/static/uploads/pdfs/add5fa58-e1a1-459b-a82f-ba9598d8a965_6-19-2-07.pdf",
+    "created_at": "2025-05-02T08:19:58",
+    "updated_at": "2025-05-02T08:19:58",
     "photos": [
       {
-        "path": "photos/1.jpg",
-        "date": "2025-05-01",
-        "location": "中山北路二段",
-        "description": "混凝土澆置完成，表面整平。"
+        "inspection_id": 1,
+        "photo_path": "app/static/uploads/photos/8ecc65f8-1b3a-4e41-801f-26626bcae41c_LINE_ALBUM_202337_230807_1.jpg",
+        "capture_date": "2025-05-02",
+        "caption": "渠牆高度檢核H=2.0M",
+        "id": 1
       },
       {
-        "path": "photos/2.jpg",
-        "date": "2025-05-02",
-        "location": "中山北路與民權東路口",
-        "description": "模板拆除完成，排水溝側牆可見。"
+        "inspection_id": 1,
+        "photo_path": "app/static/uploads/photos/fe460ded-e12b-46d0-98fb-70097b0ab250_S__8871976.jpg",
+        "capture_date": "2025-05-02",
+        "caption": "中油管線探測",
+        "id": 2
       },
       {
-        "path": "photos/3.jpg",
-        "date": "2025-05-03",
-        "location": "中山北路與民權東路口",
-        "description": "模板拆除完成，排水溝側牆可見。"
+        "inspection_id": 1,
+        "photo_path": "app/static/uploads/photos/bb9311fc-e036-4ea5-912e-cdf61d807bde_S__55828535.jpg",
+        "capture_date": "2025-05-02",
+        "caption": "鋼筋尾端加裝保護套",
+        "id": 3
       }
     ]
-  }
-  
-
+}
