@@ -152,7 +152,7 @@ col3, col4 = st.columns([1,1])
 
 with col3.container(border=True):
 
-    st.badge("2.填寫抽查資料",color="violet")
+    st.badge("填寫抽查資料",color="violet")
 
     prjs=get_projects()
     get_project_list = [item["name"] for item in prjs]
@@ -216,13 +216,13 @@ with col4:
 
 ## 加入上傳照片按鈕
 
-if st.sidebar.button("📤 1.上傳抽查表", key="upload_pdf"):
+if st.sidebar.button("📤 上傳抽查表", key="upload_pdf"):
     upload_pdf_ui()
 
-if st.sidebar.button("📸 3.上傳照片", key="upload_photos"):
+if st.sidebar.button("📸 上傳照片", key="upload_photos"):
     upload_photos_ui()
 
 st.markdown("---")
 
-if st.button("4.儲存資料", type="primary"):
+if st.button("儲存資料", type="primary"):
     save_inspection_data()

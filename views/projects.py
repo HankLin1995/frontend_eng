@@ -7,14 +7,15 @@ from api import (
     get_project,
     create_project,
     update_project,
-    delete_project
+    delete_project,
+    get_project_storage
 )
 from convert import get_projects_df
 
 st.subheader("🏢 專案管理")
 
 # 顯示專案列表
-@st.cache_data()
+# @st.cache_data()
 def display_projects():
     df = get_projects_df()
     if df.empty:
@@ -30,6 +31,32 @@ def display_projects():
         use_container_width=True,
         hide_index=True
     )
+    
+    # # 顯示選中專案的儲存空間信息
+    # st.subheader("📊 專案儲存空間使用情況")
+    
+    # # 創建三列佈局
+    # col1, col2, col3 = st.columns(3)
+    
+    # # 選擇專案
+    # project_options = [(str(p.專案編號), p.專案名稱) for p in df.itertuples(index=False)]
+    # selected_project = col1.selectbox(
+    #     "選擇專案", 
+    #     options=[x[0] for x in project_options], 
+    #     format_func=lambda x: dict(project_options)[x]
+    # )
+    
+    # if selected_project:
+    #     # 獲取儲存空間信息
+    #     storage_info = get_project_storage(int(selected_project))
+        
+    #     if storage_info:
+    #         # 顯示基本信息
+    #         col2.metric("總檔案數", f"{storage_info['file_count']} 個檔案")
+    #         col3.metric("總儲存空間", storage_info['total_size_formatted'])
+            
+    #     else:
+    #         st.error("無法獲取儲存空間信息")
 
 # 新增專案對話框
 @st.dialog("📝新增專案")
@@ -182,4 +209,3 @@ with col2:
 with col3:
     if st.button("🗑️刪除專案", use_container_width=True):
         delete_project_ui()
-

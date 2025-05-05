@@ -164,3 +164,65 @@ def merge_pdfs(original_pdf_path, photo_pdf_bytes):
     
     # 返回合併後的 PDF 的 bytes
     return output.getvalue()
+
+def merge_multiple_pdfs(pdf_files_list):
+    """
+    合併多個 PDF 檔案
+    
+    Args:
+        pdf_files_list: 一個列表，每個元素是一個元組 (pdf_bytes, is_from_url)
+                      - pdf_bytes: 如果 is_from_url 為 True，則是 URL 字串；否則是 PDF 的 bytes
+                      - is_from_url: 布林值，表示 pdf_bytes 是 URL 還是 bytes
+    
+    Returns:
+        bytes: 合併後的 PDF 檔案的 bytes
+    """
+    import io
+    import requests
+    from PyPDF2 import PdfReader, PdfWriter
+    
+    # 創建一個 PDF writer 對象
+    merger = PdfWriter()
+    
+    # 遍歷所有 PDF 檔案
+    for pdf_content, is_from_url in pdf_files_list:
+        try:
+            # 根據內容類型處理 PDF
+            if is_from_url:
+                # 如果是 URL，下載 PDF 檔案
+                if pdf_content.startswith('http'):
+                    response = requests.get(pdf_content)
+                    if response.status_code == 200:
+                        pdf = PdfReader(io.BytesIO(response.content))
+                    else:
+                        print(f"下載 PDF 失敗，跳過此檔案。狀態碼: {response.status_code}")
+                        continue
+                else:
+                    # 本地檔案路徑
+                    try:
+                        pdf = PdfReader(pdf_content)
+                    except:
+                        print(f"讀取本地 PDF 失敗，跳過此檔案: {pdf_content}")
+                        continue
+            else:
+                # 如果是 bytes 內容
+                pdf = PdfReader(io.BytesIO(pdf_content))
+            
+            # 添加所有頁面
+            for page in pdf.pages:
+                merger.add_page(page)
+                
+        except Exception as e:
+            print(f"處理 PDF 時發生錯誤: {e}")
+            continue
+    
+    # 如果沒有成功添加任何頁面
+    if len(merger.pages) == 0:
+        return None
+    
+    # 將合併後的 PDF 寫入 BytesIO 對象
+    output = io.BytesIO()
+    merger.write(output)
+    
+    # 返回合併後的 PDF 的 bytes
+    return output.getvalue()

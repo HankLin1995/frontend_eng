@@ -248,38 +248,59 @@ inspection_data={}
 if selection:
 
     filtered_df = df.iloc[selection]
-    inspection_id=int(filtered_df['抽查編號'].values[0])
-    inspection_data=get_inspection(inspection_id)
 
-    # st.write(inspection_data)
+    # st.write(filtered_df)
+
+    if st.button("🗑️ 刪除報表", key="delete_multiple"):
+
+        for _, row in filtered_df.iterrows():
+            inspection_id = int(row['抽查編號'])
+
+            delete_inspection(inspection_id)
+            st.toast("刪除成功", icon="✅")
+
+        st.cache_data.clear()
+        time.sleep(1)
+        st.rerun()
 
 st.markdown("---")
 
-if inspection_data and st.button("📝列印報告"):
-    
-    from utils import generate_pdf, merge_pdfs
+if len(selection) > 0:
+    if st.button("📝列印報表", key="print_multiple"):
+        from utils import generate_pdf, merge_multiple_pdfs
+        
+        # 取得所有選中的抽查報表數據
+        filtered_df = df.iloc[selection]
 
-    # 生成照片報告 PDF 的 bytes
-    photo_pdf_bytes = generate_pdf(inspection_data)
-    
-    # 原始 PDF 的 URL 路徑（使用 data 中的路徑或提供預設路徑）
-    original_pdf_url = f"http://localhost:8000/{inspection_data.get('pdf_path', '')}"
-    
-    # 合併 PDF
-    merged_pdf_bytes = merge_pdfs(original_pdf_url, photo_pdf_bytes)
+        pdf_files_list = []
+        
+        # 遍歷所有選中的抽查
+        for i, (_, row) in enumerate(filtered_df.iterrows()):
 
-    # 在 Streamlit 中顯示下載按鈕
-    st.download_button(
-        label="下載合併 PDF 報告",
-        data=merged_pdf_bytes,
-        file_name=f"inspection_report_{inspection_data.get('id')}_merged.pdf",
-        mime="application/pdf"
-    )
-
-    # # 此外，提供單獨下載照片報告 PDF 的選項
-    # st.download_button(
-    #     label="僅下載照片報告",
-    #     data=photo_pdf_bytes,
-    #     file_name=f"inspection_report_{inspection_data.get('id')}_photos.pdf",
-    #     mime="application/pdf"
-    # )
+            # 獲取完整的抽查數據
+            insp_id = int(row['抽查編號'])
+            insp_data = get_inspection(insp_id)
+            
+            if insp_data:
+                # 添加原始 PDF（如果有）
+                if insp_data.get('pdf_path'):
+                    pdf_url = f"http://localhost:8000/{insp_data.get('pdf_path')}"
+                    pdf_files_list.append((pdf_url, True))
+                
+                # 生成並添加照片報告 PDF
+                photo_pdf_bytes = generate_pdf(insp_data)
+                pdf_files_list.append((photo_pdf_bytes, False))
+        
+        # 合併所有 PDF
+        merged_pdf_bytes = merge_multiple_pdfs(pdf_files_list)
+        
+        if merged_pdf_bytes:
+            # 在 Streamlit 中顯示下載按鈕
+            st.download_button(
+                label="下載合併 PDF 報告",
+                data=merged_pdf_bytes,
+                file_name=f"multiple_inspection_reports_{datetime.now().strftime('%Y%m%d%H%M%S')}.pdf",
+                mime="application/pdf"
+            )
+        else:
+            st.error("合併 PDF 失敗，請確認選擇的報表有效。")

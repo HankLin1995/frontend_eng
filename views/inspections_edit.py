@@ -175,7 +175,7 @@ if st.session_state.selected_inspection_id and st.session_state.inspection_data:
     inspection_data = st.session_state.inspection_data
     
     # 顯示抽查表基本資訊
-    st.info(f"📋 抽查表 ID: {inspection_data['id']} | 建立時間: {inspection_data['created_at']} | 更新時間: {inspection_data['updated_at']}")
+    st.info(f"📋 抽查表 ID: {inspection_data['id']} | 建立時間: {inspection_data['created_at']} ")
     
     col3, col4 = st.columns([1,1])
     
@@ -190,7 +190,6 @@ if st.session_state.selected_inspection_id and st.session_state.inspection_data:
         
         # 顯示專案名稱、抽查表名稱、日期、地點、抽查時機
 
-        st.badge("## 基本資訊 ## ")
         st.markdown(f"🏗️ **專案名稱**: {project_name}")
         st.markdown(f"📋 **抽查表名稱**: {inspection_data['inspection_form_name']}")
         st.markdown(f"📅 **日期**: {inspection_data['inspection_date']}")
@@ -199,11 +198,11 @@ if st.session_state.selected_inspection_id and st.session_state.inspection_data:
         st.markdown("---")
         
         # 可編輯的欄位
-        st.badge("## 可編輯的欄位 ##")
+        st.badge("可編輯的欄位",color="violet")
         check_result = st.pills("✅ 抽查結果", options=["合格", "不合格"], default=inspection_data.get("result", None))
         check_note = st.text_area("🗒️ 備註", value=inspection_data.get("remark", ""), height=100)
 
-        if st.button("💾 儲存更新", type="primary"):
+        if st.button("儲存更新", type="primary"):
             update_inspection_data()
 
     with col4:

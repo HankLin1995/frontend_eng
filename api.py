@@ -234,3 +234,17 @@ def delete_photo(photo_id):
             return {"error": response.text}
     except Exception as e:
         return {"error": str(e)}
+
+# 儲存空間相關 API
+def get_project_storage(project_id):
+    """獲取專案的儲存空間信息"""
+    try:
+        response = requests.get(f"{API_BASE_URL}/api/projects/{project_id}/storage")
+        if response.status_code == 200:
+            return response.json()
+        else:
+            st.error(f"獲取儲存空間信息失敗: {response.text}")
+            return None
+    except Exception as e:
+        st.error(f"API 連線錯誤: {str(e)}")
+        return None
