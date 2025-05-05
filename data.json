@@ -1,0 +1,27 @@
+{
+    "project_name": "中山北路排水改善工程",
+    "agency": "台北市政府工務局",
+    "report_date": "2025-05-04",
+    "photos": [
+      {
+        "path": "photos/1.jpg",
+        "date": "2025-05-01",
+        "location": "中山北路二段",
+        "description": "混凝土澆置完成，表面整平。"
+      },
+      {
+        "path": "photos/2.jpg",
+        "date": "2025-05-02",
+        "location": "中山北路與民權東路口",
+        "description": "模板拆除完成，排水溝側牆可見。"
+      },
+      {
+        "path": "photos/3.jpg",
+        "date": "2025-05-03",
+        "location": "中山北路與民權東路口",
+        "description": "模板拆除完成，排水溝側牆可見。"
+      }
+    ]
+  }
+  
+
