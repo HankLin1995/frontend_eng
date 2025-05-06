@@ -2,7 +2,7 @@ import streamlit as st
 # from auth import check_ad_credentials, get_user_info_one, parse_dn, white_list
 import time
 
-VERSION="1.1.0"
+VERSION="1.1.1"
 
 st.set_page_config(page_title=f"施工抽查系統-V{VERSION}",layout="wide")
 
