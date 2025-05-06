@@ -51,21 +51,10 @@ def generate_pdf(data):
             leading=14,
             spaceAfter=6
         ))
-        
-        # 標題3樣式
-        styles.add(ParagraphStyle(
-            name='ChineseHeading3',
-            parent=styles['Heading3'],
-            fontName=chinese_font,
-            fontSize=14,
-            leading=16,
-            spaceAfter=6
-        ))
 
     # 使用中文樣式或備用樣式
     title_style = styles['ChineseTitle'] if chinese_font else styles['Title']
     normal_style = styles['ChineseNormal'] if chinese_font else styles['Normal']
-    heading3_style = styles['ChineseHeading3'] if chinese_font else styles['Heading3']
 
     # 創建內容元素列表
     elements = []
