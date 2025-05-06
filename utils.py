@@ -95,64 +95,6 @@ def generate_pdf(data):
         print(f"生成 PDF 時發生錯誤: {e}")
         return None
 
-def merge_pdfs(original_pdf_path, photo_pdf_bytes):
-    """
-    合併原始 PDF 和照片報告 PDF
-    
-    Args:
-        original_pdf_path (str): 原始 PDF 文件的路徑或 URL
-        photo_pdf_bytes (bytes): 照片報告 PDF 的 bytes 內容
-        
-    Returns:
-        bytes: 合併後的 PDF 文件的 bytes
-    """
-    import io
-    import requests
-    from PyPDF2 import PdfReader, PdfWriter
-    
-    # 創建一個 PDF writer 對象
-    merger = PdfWriter()
-    
-    # 添加原始 PDF
-    try:
-        # 檢查是否為 URL
-        if original_pdf_path.startswith('http'):
-            # 下載 PDF 文件
-            response = requests.get(original_pdf_path)
-            if response.status_code == 200:
-                original_pdf = PdfReader(io.BytesIO(response.content))
-            else:
-                raise Exception(f"下載 PDF 失敗，狀態碼: {response.status_code}")
-        else:
-            # 本地文件
-            original_pdf = PdfReader(original_pdf_path)
-            
-        for page in original_pdf.pages:
-            merger.add_page(page)
-    except Exception as e:
-        print(f"添加原始 PDF 時發生錯誤: {e}")
-        # 如果原始 PDF 不存在或有問題，只返回照片報告 PDF
-        return photo_pdf_bytes
-    
-    # 添加照片報告 PDF
-    try:
-        photo_pdf = PdfReader(io.BytesIO(photo_pdf_bytes))
-        for page in photo_pdf.pages:
-            merger.add_page(page)
-    except Exception as e:
-        print(f"添加照片報告 PDF 時發生錯誤: {e}")
-        # 如果照片報告 PDF 有問題，只返回原始 PDF
-        output = io.BytesIO()
-        merger.write(output)
-        return output.getvalue()
-    
-    # 將合併後的 PDF 寫入 BytesIO 對象
-    output = io.BytesIO()
-    merger.write(output)
-    
-    # 返回合併後的 PDF 的 bytes
-    return output.getvalue()
-
 def merge_multiple_pdfs(pdf_files_list):
     """
     合併多個 PDF 檔案
