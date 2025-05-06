@@ -1,6 +1,9 @@
 import streamlit as st
 import pandas as pd
 import time
+import os
+from io import BytesIO
+import requests
 from api import (
     get_photos,
     get_photo,
@@ -82,12 +85,27 @@ def get_filter_options():
     return selected_inspection_name, selected_count
 
 def single_card(row):
-    st.image(f"http://localhost:8000/{row['檔案路徑']}")
-    st.badge(f"照片ID: {row['照片編號']}")
-    st.caption(f"檢查位置: {row['檢查位置']}")
-    st.caption(f"照片說明: {row['描述']}")
-    st.caption(f"上傳時間: {row['上傳時間']}")
-    st.caption(f"抽查名稱: {row['抽查表名稱']}")
+    # 構建照片的完整URL
+    if '檔案路徑' in row:
+        photo_filename = os.path.basename(row['檔案路徑'])
+        photo_url = f"http://backend:8000/{row['檔案路徑']}"
+        
+        # 顯示照片資訊
+        st.markdown(f"**照片ID**: {row.get('照片編號', '無ID')}")
+        st.markdown(f"**照片說明**: {row.get('描述', '無說明')}")
+        st.markdown(f"**檢查位置**: {row.get('檢查位置', '無位置')}")
+        
+        # 顯示照片
+        try:
+            response = requests.get(photo_url)
+            if response.status_code == 200:
+                st.image(BytesIO(response.content), caption=row.get('描述', '無說明'))
+            else:
+                st.error(f"無法獲取照片: HTTP {response.status_code}")
+                st.markdown(f"**照片連結**: [{photo_filename}]({photo_url})")
+        except Exception as e:
+            st.error(f"照片顯示錯誤: {e}")
+            st.markdown(f"**照片連結**: [{photo_filename}]({photo_url})")
 
 # 上傳照片對話框
 @st.dialog("📤上傳照片")
@@ -165,7 +183,19 @@ def update_photo_ui():
     # 編輯表單
     with st.form("edit_photo_form"):
         # 顯示照片預覽
-        st.image(f"http://localhost:8000/{photo['photo_path']}")
+        photo_url = f"http://backend:8000/{photo['photo_path']}"
+        try:
+            response = requests.get(photo_url)
+            if response.status_code == 200:
+                st.image(BytesIO(response.content), caption=photo.get('caption', '無說明'))
+            else:
+                st.error(f"無法獲取照片: HTTP {response.status_code}")
+                photo_filename = os.path.basename(photo['photo_path'])
+                st.markdown(f"**照片連結**: [{photo_filename}]({photo_url})")
+        except Exception as e:
+            st.error(f"照片顯示錯誤: {e}")
+            photo_filename = os.path.basename(photo['photo_path'])
+            st.markdown(f"**照片連結**: [{photo_filename}]({photo_url})")
         
         caption = st.text_input("照片描述", value=photo.get("caption", ""))
         

@@ -200,7 +200,7 @@ if st.session_state.selected_inspection_id and st.session_state.inspection_data:
         # 可編輯的欄位
         st.badge("可編輯的欄位",color="violet")
         check_result = st.pills("✅ 抽查結果", options=["合格", "不合格"], default=inspection_data.get("result", None))
-        check_note = st.text_area("🗒️ 備註", value=inspection_data.get("remark", ""), height=50)
+        check_note = st.text_area("🗒️ 備註", value=inspection_data.get("remark", ""), height=100)
 
         if st.button("儲存更新", type="primary"):
             update_inspection_data()

@@ -6,6 +6,8 @@ VERSION="1.1.1"
 
 st.set_page_config(page_title=f"施工抽查系統-V{VERSION}",layout="wide")
 
+st.logo("lOGO.JPG")
+
 # 建築巡檢系統頁面
 project_page = st.Page("views/projects.py", title="專案管理", icon=":material/domain:")
 inspection_page = st.Page("views/inspections.py", title="抽查表清單", icon=":material/list:")
