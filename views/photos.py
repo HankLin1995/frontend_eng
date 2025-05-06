@@ -15,6 +15,9 @@ from convert import get_inspections_df, get_photos_df
 
 inspections_df = get_inspections_df()
 
+# API 基礎 URL，預設為 localhost:8000
+API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
+
 # @st.cache_data()
 def get_filter_df(inspection_name=None, inspection_count=None):
     # 取得照片資料
@@ -88,7 +91,7 @@ def single_card(row):
     # 構建照片的完整URL
     if '檔案路徑' in row:
         photo_filename = os.path.basename(row['檔案路徑'])
-        photo_url = f"http://backend:8000/{row['檔案路徑']}"
+        photo_url = f"{API_BASE_URL}/{row['檔案路徑']}"
         
         # 顯示照片資訊
         st.markdown(f"**照片ID**: {row.get('照片編號', '無ID')}")
@@ -183,7 +186,7 @@ def update_photo_ui():
     # 編輯表單
     with st.form("edit_photo_form"):
         # 顯示照片預覽
-        photo_url = f"http://backend:8000/{photo['photo_path']}"
+        photo_url = f"{API_BASE_URL}/{photo['photo_path']}"
         try:
             response = requests.get(photo_url)
             if response.status_code == 200:
