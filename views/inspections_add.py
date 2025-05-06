@@ -2,12 +2,14 @@ import streamlit as st
 import pypdfium2 as pdfium
 import datetime
 
-from api import get_projects, create_inspection, upload_inspection_pdf, upload_photo
+from api import get_projects, create_inspection, upload_inspection_pdf, upload_photo, get_project_storage
 
 if "photos" not in st.session_state:
     st.session_state.photos = []  # 用來儲存多張照片的列表
 if "pdf_file" not in st.session_state:
     st.session_state.pdf_file = None  # 用來儲存上傳的 PDF 檔案
+if "project_id" not in st.session_state:
+    st.session_state.project_id = None  # 用來儲存專案ID
 
 # PDF 初始化（不儲存檔案）
 def initialize_pdf(uploaded_file):
@@ -47,6 +49,8 @@ def pagination_controls(total_pages):
 def upload_pdf_ui():
 
     pdf_file = st.file_uploader("請選擇", type=["pdf", "jpg", "jpeg", "png"])
+
+    #確認目前系統餘裕
 
     if st.button("確認上傳"):
         st.session_state.pdf_file = pdf_file
@@ -155,6 +159,7 @@ with col3.container(border=True):
     st.badge("填寫抽查資料",color="violet")
 
     prjs=get_projects()
+
     get_project_list = [item["name"] for item in prjs]
 
     check_project = st.selectbox("🏗️ 專案名稱", options=get_project_list)
@@ -164,6 +169,12 @@ with col3.container(border=True):
     check_type = st.pills("🕒 抽查時機", options=["檢驗停留點", "隨機抽查", "其他"])
     check_result = st.pills("✅ 抽查結果", options=["合格", "不合格"])
     check_note = st.text_area("🗒️ 備註", height=100)
+
+    # Find the selected project's ID
+    selected_project = next(item for item in prjs if item["name"] == check_project)
+    project_id = selected_project["id"]
+
+    st.session_state.project_id = project_id
 
 with col4:
 
@@ -215,14 +226,22 @@ with col4:
 #         st.image(photo["file"], caption=photo["caption"])
 
 ## 加入上傳照片按鈕
+            
+current_storage=get_project_storage(st.session_state.project_id)
 
-if st.sidebar.button("📤 上傳抽查表", key="upload_pdf"):
-    upload_pdf_ui()
+st.sidebar.write("📦 剩餘空間=",int((100*1024*1024-current_storage['total_size_bytes'])/1024/1024),"MB")
 
-if st.sidebar.button("📸 上傳照片", key="upload_photos"):
-    upload_photos_ui()
+max_size=100*1024*1024
 
-st.markdown("---")
+if current_storage['total_size_bytes'] <= max_size:
 
-if st.button("儲存資料", type="primary"):
-    save_inspection_data()
+    if st.sidebar.button("📤 上傳抽查表", key="upload_pdf"):
+        upload_pdf_ui()
+
+    if st.sidebar.button("📸 上傳照片", key="upload_photos"):
+        upload_photos_ui()
+
+    st.markdown("---")
+
+    if st.button("儲存資料", type="primary"):
+        save_inspection_data()
