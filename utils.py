@@ -70,12 +70,11 @@ def generate_pdf(data):
         
         # 表格資料放 metadata + 圖片
         table_data.append([Paragraph("拍攝日期", normal_style), Paragraph(photo["capture_date"], normal_style)])
-        # table_data.append([Paragraph("位置", normal_style), Paragraph(photo["location"], normal_style)])
         table_data.append([Paragraph("說明", normal_style), Paragraph(photo["caption"], normal_style)])
         table_data.append([Paragraph("圖片", normal_style), Image(f"http://localhost:8000/{photo['photo_path']}", width=9 * cm, height=9 * cm, kind='proportional')])
 
     # 創建單一表格並設定樣式
-    table = Table(table_data, colWidths=[3 * cm, 12 * cm], rowHeights=None)  # 讓行高根據內容自動調整
+    table = Table(table_data, colWidths=[3 * cm, 12 * cm])
     table.setStyle(TableStyle([
         ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),  # 設定邊框
         ("VALIGN", (0, 0), (-1, -1), "TOP"),  # 垂直對齊
