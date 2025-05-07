@@ -148,9 +148,18 @@ def save_inspection_data():
     st.session_state.pdf_file = None
     st.rerun()
 
+try:
+
+    current_storage=get_project_storage(st.session_state.project_id)
+    available_space=int((100*1024*1024-current_storage['total_size_bytes'])/1024/1024)
+
+except:
+    available_space="未能獲取使用情況"
+
 # 主應用介面
 
 st.subheader("✏️  新增抽查表")
+st.info(f"目前工程-> {st.session_state.active_project} | 📦 剩餘空間: {available_space} MB")
 
 col3, col4 = st.columns([1,1])
 
@@ -158,11 +167,12 @@ with col3.container(border=True):
 
     st.badge("填寫抽查資料",color="violet")
 
-    prjs=get_projects()
+    prjs=get_projects(owner=st.user.email)
 
     get_project_list = [item["name"] for item in prjs]
 
-    check_project = st.selectbox("🏗️ 專案名稱", options=get_project_list)
+    # check_project = st.selectbox("🏗️ 專案名稱", options=get_project_list,disabled=True)
+    check_project=st.session_state.active_project
     check_date = st.date_input("📅 日期")
     check_location = st.text_input("🗺️ 地點")
     check_item = st.text_input("📝 抽查項目")
@@ -227,10 +237,6 @@ with col4:
 
 ## 加入上傳照片按鈕
             
-current_storage=get_project_storage(st.session_state.project_id)
-
-st.sidebar.write("📦 剩餘空間=",int((100*1024*1024-current_storage['total_size_bytes'])/1024/1024),"MB")
-
 max_size=100*1024*1024
 
 if current_storage['total_size_bytes'] <= max_size:
@@ -240,6 +246,8 @@ if current_storage['total_size_bytes'] <= max_size:
 
     if st.sidebar.button("📸 上傳照片", key="upload_photos"):
         upload_photos_ui()
+
+    st.sidebar.markdown("---")
 
     st.markdown("---")
 

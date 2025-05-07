@@ -44,7 +44,7 @@ def add_inspection_ui():
     st.subheader("新增抽查紀錄")
     with st.form("add_inspection_form", clear_on_submit=True):
         # 專案選擇
-        project_options = [(str(p.專案編號), p.專案名稱) for p in get_projects_df().itertuples(index=False)]
+        project_options = [(str(p.專案編號), p.專案名稱) for p in get_projects_df(owner=st.user.email).itertuples(index=False)]
         project_id = st.selectbox("所屬專案", options=[x[0] for x in project_options], format_func=lambda x: dict(project_options)[x])
 
         subproject_name = st.text_input("分項工程名稱")
@@ -205,28 +205,38 @@ def delete_inspection_ui():
 
 ##### MAIN_UI #####
 
-st.subheader("🔍 抽查表清單")
+st.subheader(f"🔍 抽查表清單")
+st.info(f"目前工程-> {st.session_state.active_project}")
 
 # 取得目標專案
 
-projects_df = get_projects_df()
-project_filter = st.sidebar.selectbox(
-    "依專案篩選", 
-    ["全部專案"] + projects_df["專案名稱"].tolist() if not projects_df.empty else ["全部專案"]
-)
+# projects_df = get_projects_df(owner=st.user.email)
+# project_filter = st.sidebar.selectbox(
+#     "依專案篩選", 
+#     ["全部工程"] + projects_df["工程名稱"].tolist() if not projects_df.empty else ["全部工程"]
+# )
 
-if project_filter == "全部專案":
-    project_id=None
-else:
-    project_id=projects_df[projects_df["專案名稱"] == project_filter]["專案編號"].values[0]
+# if project_filter == "全部工程":
+#     project_id=None
+# else:
+#     project_id=projects_df[projects_df["工程名稱"] == project_filter]["專案編號"].values[0]
 
-df = get_inspections_df()
+project_id = st.session_state.active_project_id
+
+df = get_inspections_df(project_id)
+
+if df.empty:
+    st.warning("沒有找到抽查表")
+    st.stop()
+
+# st.write(df)
 
 # 顯示篩選後的抽查清單
 
-if project_filter != "全部專案":
-    df=df[df["專案編號"] == project_id]
+# if project_filter != "全部工程":
+    # df=df[df["專案編號"] == project_id]
 
+# df=df[df["專案編號"] == project_id]
 
 df_show=df[["抽查編號", "抽查表名稱", "抽查日期","檢查位置", "抽查結果"]].style.format({
         "抽查日期": lambda x: x
@@ -280,17 +290,34 @@ if len(selection) > 0:
             # 獲取完整的抽查數據
             insp_id = int(row['抽查編號'])
             insp_data = get_inspection(insp_id)
+            # st.write(insp_data)
             
             if insp_data:
+                # # 添加原始 PDF（如果有）
+                # if insp_data.get('pdf_path'):
+                #     pdf_url = f"http://localhost:8000/{insp_data.get('pdf_path')}"
+                #     pdf_files_list.append((pdf_url, True))
+                
+                # # 生成並添加照片報告 PDF
+                # photo_pdf_bytes = generate_pdf(insp_data)
+                # pdf_files_list.append((photo_pdf_bytes, False))
                 # 添加原始 PDF（如果有）
                 if insp_data.get('pdf_path'):
                     pdf_url = f"http://localhost:8000/{insp_data.get('pdf_path')}"
                     pdf_files_list.append((pdf_url, True))
-                
-                # 生成並添加照片報告 PDF
-                photo_pdf_bytes = generate_pdf(insp_data)
-                pdf_files_list.append((photo_pdf_bytes, False))
-        
+
+                # 照片分組，每3張為一組
+                photos = insp_data.get('photos', [])
+                for j in range(0, len(photos), 3):
+                    photo_group = photos[j:j+3]
+                    
+                    # 為這組照片建立新的 inspection data (僅包含這組照片)
+                    temp_insp_data = insp_data.copy()
+                    temp_insp_data["photos"] = photo_group
+
+                    # 生成報告 PDF 並加入清單
+                    photo_pdf_bytes = generate_pdf(temp_insp_data)
+                    pdf_files_list.append((photo_pdf_bytes, False))
         # 合併所有 PDF
         merged_pdf_bytes = merge_multiple_pdfs(pdf_files_list)
         

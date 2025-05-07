@@ -121,20 +121,22 @@ def select_inspection(inspection_id):
 
 # 側邊欄 - 抽查表選擇
 with st.sidebar:
-    st.title("🔍 選擇抽查表")
+    # st.title("🔍 選擇抽查表")
     
-    # 獲取專案列表
-    projects = get_projects()
-    project_options = ["全部"] + [project["name"] for project in projects]
-    selected_project = st.selectbox("選擇專案", options=project_options)
+    # # 獲取專案列表
+    # projects = get_projects()
+    # project_options = ["全部"] + [project["name"] for project in projects]
+    # selected_project = st.selectbox("選擇專案", options=project_options)
     
-    # 根據選擇的專案獲取抽查表
-    project_id = None
-    if selected_project != "全部":
-        for project in projects:
-            if project["name"] == selected_project:
-                project_id = project["id"]
-                break
+    # # 根據選擇的專案獲取抽查表
+    # project_id = None
+    # if selected_project != "全部":
+    #     for project in projects:
+    #         if project["name"] == selected_project:
+    #             project_id = project["id"]
+    #             break
+
+    project_id = st.session_state.active_project_id
     
     # 獲取抽查表列表
     inspections = get_inspections(project_id)
@@ -142,11 +144,11 @@ with st.sidebar:
     if inspections:
         # 建立抽查表選項列表
         inspection_options = [f"{insp['inspection_form_name']} - {insp['inspection_date']} (ID: {insp['id']})" for insp in inspections]
-        inspection_options.insert(0, "請選擇抽查表")  # 添加預設選項
+        # inspection_options.insert(0, "請選擇抽查表")  # 添加預設選項
         
         # 使用selectbox選擇抽查表
         selected_inspection_option = st.selectbox("抽查表列表", options=inspection_options, key="inspection_selector")
-        
+        st.markdown("---")
         # 當選擇了非預設選項時，處理選擇
         if selected_inspection_option != "請選擇抽查表":
             # 從選項中提取ID
@@ -165,7 +167,8 @@ with st.sidebar:
             st.toast("⭐ 請選擇抽查表")
                 
     else:
-        st.info("沒有找到抽查表")
+        st.warning("沒有找到抽查表")
+        st.stop()
 
 # 主應用介面
 st.subheader(":pencil: 編輯抽查表")
@@ -182,12 +185,14 @@ if st.session_state.selected_inspection_id and st.session_state.inspection_data:
     with col3.container(border=True):
 
         # 顯示專案名稱（不可編輯）
-        project_name = ""
-        for project in projects:
-            if project["id"] == inspection_data["project_id"]:
-                project_name = project["name"]
-                break
+        # project_name = ""
+        # for project in projects:
+        #     if project["id"] == inspection_data["project_id"]:
+        #         project_name = project["name"]
+        #         break
         
+        project_name = st.session_state.active_project
+
         # 顯示專案名稱、抽查表名稱、日期、地點、抽查時機
 
         st.markdown(f"🏗️ **專案名稱**: {project_name}")

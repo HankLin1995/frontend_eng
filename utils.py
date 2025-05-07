@@ -41,7 +41,17 @@ def generate_pdf(data):
             alignment=1,  # 置中
             spaceAfter=12
         ))
-        
+
+        # 副標題樣式
+        styles.add(ParagraphStyle(
+            name='ChineseSubTitle',
+            parent=styles['Title'],
+            fontName=chinese_font,
+            fontSize=14,
+            alignment=2,  # 置中
+            spaceAfter=12
+        ))
+
         # 一般文字樣式
         styles.add(ParagraphStyle(
             name='ChineseNormal',
@@ -54,6 +64,7 @@ def generate_pdf(data):
 
     # 使用中文樣式或備用樣式
     title_style = styles['ChineseTitle'] if chinese_font else styles['Title']
+    sub_title_style = styles['ChineseSubTitle'] if chinese_font else styles['Normal']
     normal_style = styles['ChineseNormal'] if chinese_font else styles['Normal']
 
     # 創建內容元素列表
@@ -61,17 +72,19 @@ def generate_pdf(data):
 
     # 標題與基本資料
     elements.append(Paragraph(f"<b>抽查紀錄表照片</b>", title_style))
+    #放在最右邊
+    elements.append(Paragraph(f"抽查表名稱: {data.get('inspection_form_name', '')}", sub_title_style))
 
     # 定義表格的資料（合併所有照片內容）
     table_data = []
     for idx, photo in enumerate(data["photos"], 1):
         # 設定每行的高度
-        row_heights = [1* cm, 1 * cm, 9* cm]  # 不同的行高
+        row_heights = [1* cm, 1 * cm, 8* cm]  # 不同的行高
         
         # 表格資料放 metadata + 圖片
         table_data.append([Paragraph("拍攝日期", normal_style), Paragraph(photo["capture_date"], normal_style)])
         table_data.append([Paragraph("說明", normal_style), Paragraph(photo["caption"], normal_style)])
-        table_data.append([Paragraph("圖片", normal_style), Image(f"http://localhost:8000/{photo['photo_path']}", width=9 * cm, height=9 * cm, kind='proportional')])
+        table_data.append([Paragraph("圖片", normal_style), Image(f"http://localhost:8000/{photo['photo_path']}", width=8 * cm, height=8 * cm, kind='proportional')])
 
     # 創建單一表格並設定樣式
     table = Table(table_data, colWidths=[3 * cm, 12 * cm])

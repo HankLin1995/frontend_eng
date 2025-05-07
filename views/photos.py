@@ -13,18 +13,20 @@ from api import (
 )
 from convert import get_inspections_df, get_photos_df
 
-inspections_df = get_inspections_df()
+# inspections_df = get_inspections_df(st.session_state.active_project_id)
 
 # API 基礎 URL，預設為 localhost:8000
 API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
 
-# @st.cache_data()
-def get_filter_df(inspection_name=None, inspection_count=None):
+def get_project_photos_df():
+
+    inspections_df = get_inspections_df(st.session_state.active_project_id)
     # 取得照片資料
     df = get_photos_df()
     
     if df.empty:
         st.info("目前沒有照片資料")
+        st.stop()
         return
     
     # 合併抽查資訊
@@ -34,9 +36,31 @@ def get_filter_df(inspection_name=None, inspection_count=None):
             inspections_df[["抽查編號", "檢查位置", "抽查表名稱", "抽查次數"]], 
             left_on="抽查編號", 
             right_on="抽查編號", 
-            how="left"
+            how="right"
         )
+
+    return df
+
+# @st.cache_data()
+def get_filter_df(inspection_name=None, inspection_count=None):
+    # 取得照片資料
+    df = get_project_photos_df()
     
+    # if df.empty:
+    #     st.info("目前沒有照片資料")
+    #     st.stop()
+    #     return
+    
+    # # 合併抽查資訊
+    # if not inspections_df.empty:
+    #     df = pd.merge(
+    #         df, 
+    #         inspections_df[["抽查編號", "檢查位置", "抽查表名稱", "抽查次數"]], 
+    #         left_on="抽查編號", 
+    #         right_on="抽查編號", 
+    #         how="left"
+    #     )
+
     # 根據選擇的抽查表名稱和次數進行篩選
     if inspection_name != "全部抽查表":
         df = df[df["抽查表名稱"] == inspection_name]
@@ -47,16 +71,18 @@ def get_filter_df(inspection_name=None, inspection_count=None):
     
     if df.empty:
         st.info("沒有符合篩選條件的照片")
+        st.stop()
         return
 
     return df
 
 def get_filter_options():
     # 篩選條件
-    inspections_df = get_inspections_df()
+    inspections_df = get_inspections_df(st.session_state.active_project_id)
 
     # 建立抽查表名稱的唯一列表
-    inspection_names = ["全部抽查表"]
+    # inspection_names = ["全部抽查表"]
+    inspection_names = []
     inspection_name_to_counts = {}
 
     if not inspections_df.empty:
@@ -95,7 +121,7 @@ def single_card(row):
         
         # 顯示照片資訊
         st.markdown(f"**照片ID**: {row.get('照片編號', '無ID')}")
-        st.markdown(f"**照片說明**: {row.get('描述', '無說明')}")
+        # st.markdown(f"**照片說明**: {row.get('描述', '無說明')}")
         st.markdown(f"**檢查位置**: {row.get('檢查位置', '無位置')}")
         
         # 顯示照片
@@ -125,7 +151,6 @@ def upload_photo_ui():
         caption = st.text_input("照片描述", placeholder="請輸入照片描述")
         photo_file = st.file_uploader("選擇照片", type=["jpg", "jpeg", "png"])
         
-
         # if photo_file:
         #     st.image(photo_file)
         
@@ -151,20 +176,20 @@ def upload_photo_ui():
 @st.dialog("✏️編輯照片")
 def update_photo_ui():
     # 取得照片列表
-    photos_df = get_photos_df()
-    if photos_df.empty:
-        st.warning("目前沒有照片可編輯")
-        return
+    photos_df = get_project_photos_df()
+    # if photos_df.empty:
+    #     st.warning("目前沒有照片可編輯")
+    #     return
     
-    # 合併抽查資訊
-    if not inspections_df.empty:
-        photos_df = pd.merge(
-            photos_df, 
-            inspections_df[["抽查編號", "檢查位置", "抽查表名稱", "抽查次數"]], 
-            left_on="抽查編號", 
-            right_on="抽查編號", 
-            how="left"
-        )
+    # # 合併抽查資訊
+    # if not inspections_df.empty:
+    #     photos_df = pd.merge(
+    #         photos_df, 
+    #         inspections_df[["抽查編號", "檢查位置", "抽查表名稱", "抽查次數"]], 
+    #         left_on="抽查編號", 
+    #         right_on="抽查編號", 
+    #         how="left"
+    #     )
     
     # 選擇照片
     photo_options = [f"{row['照片編號']}" for _, row in photos_df.iterrows()]
@@ -221,20 +246,20 @@ def update_photo_ui():
 @st.dialog("🗑️刪除照片")
 def delete_photo_ui():
     # 取得照片列表
-    photos_df = get_photos_df()
-    if photos_df.empty:
-        st.warning("目前沒有照片可刪除")
-        return
+    photos_df = get_project_photos_df()
+    # if photos_df.empty:
+    #     st.warning("目前沒有照片可刪除")
+    #     return
     
-    # 合併抽查資訊
-    if not inspections_df.empty:
-        photos_df = pd.merge(
-            photos_df, 
-            inspections_df[["抽查編號", "檢查位置", "抽查表名稱", "抽查次數"]], 
-            left_on="抽查編號", 
-            right_on="抽查編號", 
-            how="left"
-        )
+    # # 合併抽查資訊
+    # if not inspections_df.empty:
+    #     photos_df = pd.merge(
+    #         photos_df, 
+    #         inspections_df[["抽查編號", "檢查位置", "抽查表名稱", "抽查次數"]], 
+    #         left_on="抽查編號", 
+    #         right_on="抽查編號", 
+    #         how="left"
+    #     )
     
     # 選擇照片
     photo_options = [f"{row['抽查表名稱']} - 第{row['抽查次數']}次 - {row['照片編號']} - {row['檢查位置']} - {row['描述']}" for _, row in photos_df.iterrows()]
@@ -264,10 +289,13 @@ def delete_photo_ui():
 
 selected_inspection_name, selected_count = get_filter_options()
 
+st.sidebar.markdown("---")
+
 df=get_filter_df(selected_inspection_name, selected_count)
 
 if not df.empty:
-    st.subheader("📸 照片圖廊")
+    st.subheader(f"📸 照片圖廊")
+    st.info(f"目前工程-> {st.session_state.active_project}")
     cols = st.columns(3, border=True)
     for i, (_, row) in enumerate(df.iterrows()):
         with cols[i % 3]:

@@ -17,59 +17,60 @@ st.subheader("🏢 專案管理")
 # 顯示專案列表
 # @st.cache_data()
 def display_projects():
-    df = get_projects_df()
+    df = get_projects_df(owner=st.user.email)
     if df.empty:
         st.info("目前沒有專案資料")
         return
     
     # 顯示專案資料表
+    # st.dataframe(
+    #     df[["專案編號", "專案名稱", "專案位置", "承包商", "開始日期", "結束日期"]].style.format({
+    #         "開始日期": lambda x: x,
+    #         "結束日期": lambda x: x
+    #     }),
+    #     use_container_width=True,
+    #     hide_index=True
+    # )
+
+    df_show=df[["專案編號", "工程名稱", "工程位置", "承攬廠商","專案擁有者"]]
+
     st.dataframe(
-        df[["專案編號", "專案名稱", "專案位置", "承包商", "開始日期", "結束日期"]].style.format({
-            "開始日期": lambda x: x,
-            "結束日期": lambda x: x
-        }),
+        df_show,
         use_container_width=True,
         hide_index=True
     )
-    
-    # # 顯示選中專案的儲存空間信息
-    # st.subheader("📊 專案儲存空間使用情況")
-    
-    # # 創建三列佈局
-    # col1, col2, col3 = st.columns(3)
-    
-    # # 選擇專案
-    # project_options = [(str(p.專案編號), p.專案名稱) for p in df.itertuples(index=False)]
-    # selected_project = col1.selectbox(
-    #     "選擇專案", 
-    #     options=[x[0] for x in project_options], 
-    #     format_func=lambda x: dict(project_options)[x]
-    # )
-    
-    # if selected_project:
-    #     # 獲取儲存空間信息
-    #     storage_info = get_project_storage(int(selected_project))
-        
-    #     if storage_info:
-    #         # 顯示基本信息
-    #         col2.metric("總檔案數", f"{storage_info['file_count']} 個檔案")
-    #         col3.metric("總儲存空間", storage_info['total_size_formatted'])
-            
-    #     else:
-    #         st.error("無法獲取儲存空間信息")
+       
+    return df_show
+
+# 檢查專案名稱是否已存在
+def check_name_exist(name):
+    df = get_projects_df(owner=st.user.email)
+    # st.write(df)
+    if name in df["工程名稱"].values:
+        return True
+    return False
 
 # 新增專案對話框
 @st.dialog("📝新增專案")
 def add_project_ui():
     with st.form("create_project_form"):
-        name = st.text_input("專案名稱", placeholder="請輸入專案名稱")
-        location = st.text_input("專案位置", placeholder="請輸入專案位置")
-        contractor = st.text_input("承包商", placeholder="請輸入承包商")
-        start_date = st.date_input("開始日期", value=datetime.now())
-        end_date = st.date_input("結束日期", value=datetime.now())
+        name = st.text_input("工程名稱")
+        location = st.text_input("工程位置")
+        contractor = st.text_input("承攬廠商")
+        # start_date = st.date_input("開始日期", value=datetime.now())
+        # end_date = st.date_input("結束日期", value=datetime.now())
+        start_date=datetime.now()
+        end_date=datetime.now()
+
+        # st.write(check_name_exist(name))
         
         submitted = st.form_submit_button("建立")
         if submitted:
+
+            if check_name_exist(name):
+                st.error("工程名稱已存在")
+                return      
+
             if not all([name, location, contractor]):
                 st.error("請填寫所有必填欄位")
                 return
@@ -84,7 +85,8 @@ def add_project_ui():
                 "location": location,
                 "contractor": contractor,
                 "start_date": start_date.strftime("%Y-%m-%d"),
-                "end_date": end_date.strftime("%Y-%m-%d")
+                "end_date": end_date.strftime("%Y-%m-%d"),
+                "owner":st.user.email
             }
             
             response = create_project(data)
@@ -100,21 +102,21 @@ def add_project_ui():
 @st.dialog("✏️編輯專案")
 def update_project_ui():
     # 取得專案列表
-    df = get_projects_df()
+    df = get_projects_df(owner=st.user.email)
     if df.empty:
         st.warning("目前沒有專案可編輯")
         return
     
     # 選擇專案
-    project_names = df["專案名稱"].tolist()
-    selected_project = st.selectbox("選擇專案", project_names)
+    project_names = df["工程名稱"].tolist()
+    selected_project = st.selectbox("選擇工程", project_names)
     
     if not selected_project:
-        st.warning("請選擇要編輯的專案")
+        st.warning("請選擇要編輯的工程")
         return
     
     # 取得專案 ID
-    project_id = df[df["專案名稱"] == selected_project]["專案編號"].values[0]
+    project_id = df[df["工程名稱"] == selected_project]["專案編號"].values[0]
     
     # 取得專案詳細資料
     project = get_project(project_id)
@@ -124,9 +126,9 @@ def update_project_ui():
     
     # 編輯表單
     with st.form("edit_project_form"):
-        name = st.text_input("專案名稱", value=project["name"])
-        location = st.text_input("專案位置", value=project["location"])
-        contractor = st.text_input("承包商", value=project["contractor"])
+        name = st.text_input("工程名稱", value=project["name"])
+        location = st.text_input("工程位置", value=project["location"])
+        contractor = st.text_input("承攬廠商", value=project["contractor"])
         start_date = st.date_input("開始日期", value=datetime.strptime(project["start_date"], "%Y-%m-%d"))
         end_date = st.date_input("結束日期", value=datetime.strptime(project["end_date"], "%Y-%m-%d"))
         
@@ -146,7 +148,8 @@ def update_project_ui():
                 "location": location,
                 "contractor": contractor,
                 "start_date": start_date.strftime("%Y-%m-%d"),
-                "end_date": end_date.strftime("%Y-%m-%d")
+                "end_date": end_date.strftime("%Y-%m-%d"),
+                "owner":st.user.email
             }
             
             response = update_project(project_id, data)
@@ -162,27 +165,27 @@ def update_project_ui():
 @st.dialog("🗑️刪除專案")
 def delete_project_ui():
     # 取得專案列表
-    df = get_projects_df()
+    df = get_projects_df(owner=st.user.email)
     if df.empty:
         st.warning("目前沒有專案可刪除")
         return
     
     # 選擇專案
-    project_names = df["專案名稱"].tolist()
-    selected_project = st.selectbox("選擇專案", project_names)
+    project_names = df["工程名稱"].tolist()
+    selected_project = st.selectbox("選擇工程", project_names)
     
     if not selected_project:
         st.warning("請選擇要刪除的專案")
         return
     
     # 取得專案 ID
-    project_id = df[df["專案名稱"] == selected_project]["專案編號"].values[0]
+    project_id = df[df["工程名稱"] == selected_project]["專案編號"].values[0]
     
     # 確認刪除
     st.warning("⚠️ 刪除專案將同時刪除所有相關抽查與照片，此操作無法復原！")
     
     if st.button("確認刪除"):
-        response = delete_project(project_id)
+        response = delete_project(project_id, owner=st.user.email)
         if "error" not in response:
             st.toast("專案刪除成功", icon="✅")
             st.cache_data.clear()
@@ -193,7 +196,26 @@ def delete_project_ui():
 
 
 # 顯示專案列表
-display_projects()
+df_show=display_projects()
+
+if "active_project" not in st.session_state:
+    st.session_state.active_project = None
+
+if "active_project_id" not in st.session_state:
+    st.session_state.active_project_id = None
+
+project_list = df_show["工程名稱"].tolist()
+default_project = st.session_state.active_project if st.session_state.active_project in project_list else project_list[0]
+
+active_project = st.sidebar.selectbox("目前工程", project_list, index=project_list.index(default_project))
+st.session_state.active_project = active_project
+
+active_project_id=df_show[df_show["工程名稱"] == active_project]["專案編號"].values[0]
+st.session_state.active_project_id = active_project_id
+
+st.sidebar.markdown("---")
+
+# st.sidebar.write(st.session_state)
 
 # 按鈕列
 col1, col2, col3 = st.columns(3)

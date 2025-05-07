@@ -1,9 +1,9 @@
 import pandas as pd
 from api import get_projects, get_inspections, get_photos
 
-def get_projects_df():
+def get_projects_df(owner):
     """將專案資料轉換為 DataFrame 格式"""
-    projects = get_projects()
+    projects = get_projects(owner)
     if not projects:
         return pd.DataFrame()
     
@@ -13,11 +13,12 @@ def get_projects_df():
         # 重新命名欄位
         df = df.rename(columns={
             "id": "專案編號",
-            "name": "專案名稱",
-            "location": "專案位置",
-            "contractor": "承包商",
+            "name": "工程名稱",
+            "location": "工程位置",
+            "contractor": "承攬廠商",
             "start_date": "開始日期",
-            "end_date": "結束日期"
+            "end_date": "結束日期",
+            "owner": "專案擁有者"
         })
         
         # 轉換日期格式
