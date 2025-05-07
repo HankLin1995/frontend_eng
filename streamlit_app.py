@@ -1,6 +1,12 @@
 import streamlit as st
 # from auth import check_ad_credentials, get_user_info_one, parse_dn, white_list
-import time
+# import time
+
+if "active_project" not in st.session_state:
+    st.session_state.active_project = None
+
+if "active_project_id" not in st.session_state:
+    st.session_state.active_project_id = None
 
 def login_info():
     col1, col2 = st.columns(2)
@@ -39,7 +45,7 @@ def login_info():
 
             st.link_button("🌎 Hank's blog", "https://www.hanksvba.com/",type="secondary")
 
-VERSION="2.0.2"
+VERSION="2.0.3"
 
 st.set_page_config(page_title=f"施工抽查系統-V{VERSION}",layout="wide")
 

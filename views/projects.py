@@ -202,12 +202,6 @@ df_show=display_projects()
 
 try:
 
-    if "active_project" not in st.session_state:
-        st.session_state.active_project = None
-
-    if "active_project_id" not in st.session_state:
-        st.session_state.active_project_id = None
-
     project_list = df_show["工程名稱"].tolist()
     default_project = st.session_state.active_project if st.session_state.active_project in project_list else project_list[0]
 
