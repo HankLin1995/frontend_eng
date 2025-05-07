@@ -39,7 +39,7 @@ def login_info():
 
             st.link_button("🌎 Hank's blog", "https://www.hanksvba.com/",type="secondary")
 
-VERSION="2.0.0"
+VERSION="2.0.1"
 
 st.set_page_config(page_title=f"施工抽查系統-V{VERSION}",layout="wide")
 

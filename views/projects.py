@@ -198,20 +198,25 @@ def delete_project_ui():
 # 顯示專案列表
 df_show=display_projects()
 
-if "active_project" not in st.session_state:
-    st.session_state.active_project = None
+try:
 
-if "active_project_id" not in st.session_state:
-    st.session_state.active_project_id = None
+    if "active_project" not in st.session_state:
+        st.session_state.active_project = None
 
-project_list = df_show["工程名稱"].tolist()
-default_project = st.session_state.active_project if st.session_state.active_project in project_list else project_list[0]
+    if "active_project_id" not in st.session_state:
+        st.session_state.active_project_id = None
 
-active_project = st.sidebar.selectbox("目前工程", project_list, index=project_list.index(default_project))
-st.session_state.active_project = active_project
+    project_list = df_show["工程名稱"].tolist()
+    default_project = st.session_state.active_project if st.session_state.active_project in project_list else project_list[0]
 
-active_project_id=df_show[df_show["工程名稱"] == active_project]["專案編號"].values[0]
-st.session_state.active_project_id = active_project_id
+    active_project = st.sidebar.selectbox("目前工程", project_list, index=project_list.index(default_project))
+    st.session_state.active_project = active_project
+
+    active_project_id=df_show[df_show["工程名稱"] == active_project]["專案編號"].values[0]
+    st.session_state.active_project_id = active_project_id
+
+except:
+    pass
 
 st.sidebar.markdown("---")
 
