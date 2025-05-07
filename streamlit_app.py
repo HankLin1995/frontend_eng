@@ -43,7 +43,7 @@ VERSION="2.0.0"
 
 st.set_page_config(page_title=f"施工抽查系統-V{VERSION}",layout="wide")
 
-st.logo("lOGO.JPG")
+st.logo("logo.jpg")
 
 if not st.user.is_logged_in:
     login_info()
