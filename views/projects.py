@@ -46,6 +46,8 @@ def display_projects():
 def check_name_exist(name):
     df = get_projects_df(owner=st.user.email)
     # st.write(df)
+    if df.empty:
+        return False
     if name in df["工程名稱"].values:
         return True
     return False

@@ -20,10 +20,10 @@ def login_info():
     with col2:
         st.markdown("### ⚠️ 注意事項")
         st.warning("""
-        - 系統目前部署在個人主機  
+        - 系統目前部署在我的個人主機  
         - 每個專案 **限制 100 MB**  
         - 請將照片**壓縮後再上傳**  
-        - 如需部署在其他主機，歡迎聯繫我們！
+        - 如需部署在指定主機，歡迎聯繫我！
                 """)
 
         st.divider()
@@ -39,7 +39,7 @@ def login_info():
 
             st.link_button("🌎 Hank's blog", "https://www.hanksvba.com/",type="secondary")
 
-VERSION="2.0.1"
+VERSION="2.0.2"
 
 st.set_page_config(page_title=f"施工抽查系統-V{VERSION}",layout="wide")
 
