@@ -9,6 +9,8 @@ import io
 import os
 from datetime import datetime
 
+from api import API_BASE_URL
+
 # with open("data.json", "r", encoding="utf-8") as f:
 #     data = json.load(f)
 
@@ -84,7 +86,7 @@ def generate_pdf(data):
         # 表格資料放 metadata + 圖片
         table_data.append([Paragraph("拍攝日期", normal_style), Paragraph(photo["capture_date"], normal_style)])
         table_data.append([Paragraph("說明", normal_style), Paragraph(photo["caption"], normal_style)])
-        table_data.append([Paragraph("圖片", normal_style), Image(f"http://localhost:8000/{photo['photo_path']}", width=8 * cm, height=8 * cm, kind='proportional')])
+        table_data.append([Paragraph("圖片", normal_style), Image(f"{API_BASE_URL}/{photo['photo_path']}", width=8 * cm, height=8 * cm, kind='proportional')])
 
     # 創建單一表格並設定樣式
     table = Table(table_data, colWidths=[3 * cm, 12 * cm])

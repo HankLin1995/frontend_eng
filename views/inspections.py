@@ -13,6 +13,8 @@ from api import (
 )
 from convert import get_projects_df, get_inspections_df
 
+from api import API_BASE_URL
+
 @st.cache_data()
 def get_merged_df(project_filter):
 
@@ -303,7 +305,7 @@ if len(selection) > 0:
                 # pdf_files_list.append((photo_pdf_bytes, False))
                 # 添加原始 PDF（如果有）
                 if insp_data.get('pdf_path'):
-                    pdf_url = f"http://localhost:8000/{insp_data.get('pdf_path')}"
+                    pdf_url = f"{API_BASE_URL}/{insp_data.get('pdf_path')}"
                     pdf_files_list.append((pdf_url, True))
 
                 # 照片分組，每3張為一組
