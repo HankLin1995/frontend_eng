@@ -46,6 +46,8 @@ def display_projects():
 def check_name_exist(name):
     df = get_projects_df(owner=st.user.email)
     # st.write(df)
+    if df.empty:
+        return False
     if name in df["工程名稱"].values:
         return True
     return False
@@ -199,12 +201,6 @@ def delete_project_ui():
 df_show=display_projects()
 
 try:
-
-    if "active_project" not in st.session_state:
-        st.session_state.active_project = None
-
-    if "active_project_id" not in st.session_state:
-        st.session_state.active_project_id = None
 
     project_list = df_show["工程名稱"].tolist()
     default_project = st.session_state.active_project if st.session_state.active_project in project_list else project_list[0]

@@ -161,6 +161,10 @@ except:
 st.subheader("✏️  新增抽查表")
 st.info(f"目前工程-> {st.session_state.active_project} | 📦 剩餘空間: {available_space} MB")
 
+if st.session_state.active_project is None:
+    st.error("請先建立專案")
+    st.stop()
+
 col3, col4 = st.columns([1,1])
 
 with col3.container(border=True):
